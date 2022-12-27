@@ -19,31 +19,31 @@ module.exports = {
   module: {
     rules: [
       {
-        test:/.(woff2?|eot|ttf|otf)$/,//匹配字体图标文件
-        type:"asset",//type选择asset
-        parser:{
-          dataUrlCondition:{
-            maxSize:10 * 1024 //小于10kb转base64位
+        test: /.(woff2?|eot|ttf|otf)$/,//匹配字体图标文件
+        type: "asset",//type选择asset
+        parser: {
+          dataUrlCondition: {
+            maxSize: 10 * 1024 //小于10kb转base64位
           }
         },
-        generator:{
-          filename:'fonts/[name].[contenthash:8][ext]' //文件输出目录和命名
+        generator: {
+          filename: 'fonts/[name].[contenthash:8][ext]' //文件输出目录和命名
         }
       },
       {
-        test:/.(mp4|webm|ogg|mp3|wav|flac|aac)$/, //匹配媒体文件
-        type:"asset",
-        parser:{
-          dataUrlCondition:{
-            maxSize:10 * 1024,//小于10kb转base64位
+        test: /.(mp4|webm|ogg|mp3|wav|flac|aac)$/, //匹配媒体文件
+        type: "asset",
+        parser: {
+          dataUrlCondition: {
+            maxSize: 10 * 1024,//小于10kb转base64位
           }
         },
-        generator:{
-          filename:'media/[name].[contenthash:8][ext]' //文件输出目录和命名
+        generator: {
+          filename: 'media/[name].[contenthash:8][ext]' //文件输出目录和命名
         }
       },
       {
-        test: /\.css$/, //匹配所有的 less 文件
+        test: /\.css$/, //匹配所有的 css 文件
         enforce: 'pre',
         include: [path.resolve(__dirname, '../src')],
         use: [
@@ -63,12 +63,23 @@ module.exports = {
           'less-loader'
         ]
       },
-      { test:/\.(png|jpe?g|gif|svg|webp)$/,type:'asset/resource',
-            parser:{
-                //转base64条件
-                dataUrlCondition:{ maxSize:25*1024,} //25kb
-            }
-        }, //webpack5写法
+      {
+        test: /\.scss$/, //匹配所有的 scss 文件
+        enforce: 'pre',
+        include: [path.resolve(__dirname, '../src')],
+        use: [
+          isDev ? 'style-loader' : MiniCssExtractPlugin.loader,
+          'css-loader',
+          'sass-loader'
+        ]
+      },
+      {
+        test: /\.(png|jpe?g|gif|svg|webp)$/, type: 'asset/resource',
+        parser: {
+          //转base64条件
+          dataUrlCondition: { maxSize: 25 * 1024, } //25kb
+        }
+      }, //webpack5写法
       {
         test: /.(ts|tsx)$/,
         use: {
@@ -86,12 +97,12 @@ module.exports = {
   resolve: {
     modules: [path.resolve(__dirname, '../node_modules')], // 查找第三方模块只在本项目的node_modules中查找
     //路径别名
-    alias:{
-      '@':path.resolve('./src'), //pwd当前目录下的src等于@
+    alias: {
+      '@': path.resolve('./src'), //pwd当前目录下的src等于@
       assets: '~/assets',
-      tools:'~/tools'
-  },
-  //引入文件时省略后缀
+      tools: '~/tools'
+    },
+    //引入文件时省略后缀
     extensions: [".js", ".tsx", ".ts"],
   },
   plugins: [
@@ -108,7 +119,7 @@ module.exports = {
       "process.env.BASE_ENV": JSON.stringify(process.env.BASE_ENV),
     }),
   ],
-  cache:{
-    type:'filesystem' // 使用文件缓存
+  cache: {
+    type: 'filesystem' // 使用文件缓存
   }
 };

@@ -1,6 +1,7 @@
 import React from 'react'
 import './app.css'
 import Index from './components/JSX'
+import './app.scss'
 // import webpack from './assets/imgs/Webpack.webp'
 
 function App() {
