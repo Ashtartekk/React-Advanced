@@ -72,30 +72,101 @@ const TextComponent = ()=><div> hello, i am function component</div>
 // export const SuspenseComponent = 13;      // 对应 <Suspense>
 // export const MemoComponent = 14;          // 对应 React.memo 返回的组件
 
+//fiber 对应关系
+//child: 一个由父级 fiber 指向子级 fiber 的指针
+//return: 一个子级 fiber 指向父级 fiber 的指针
+//sibling: 一个 fiber 指向下一个兄弟 fiber 的指针
+
+//对于上述在 jsx 中写的 map 数组结构的子节点，外层会被加上 fragment
+//map 返回数组结构，作为fragment 的子节点
+
+//可控性 render
+//上面的 demo 暴露出了如下问题:
+
+//返回的 children 虽然是一个数组，但是数组里面的数据类型却是不确定的，有对象类型(如ReactElement)，有
+//数组类型(如map遍历返回的子节点)，还有字符串类型（如文本）
+// 无法对 render后的React element 元素进行可控性操作
+
+//针对这些问题，要多demo项目进行改造处理，具体可以分为4步:
+//1.将上述 children 扁平化处理，将数组类型的子节点打开；
+//2.干掉children 中文本类型节点
+//3.向children 最后插入say goodbye 元素
+//4.克隆新的元素节点并渲染
+
+
+
+// class Index extends React.Component{
+//     status = false //状态
+//     renderFoot = ()=> <div> i am foot</div>
+//     render(){
+//         // 以下都是常用的jsx元素
+//         return <div style={{marginTop:'100px'}}>
+//             {/* element元素类型 */}
+//             <div>hello,world</div>
+//             {/* fragment类型 */}
+//             <React.Fragment>
+//                 <div>👽👽</div>
+//             </React.Fragment>
+//             {/* text文本类型 */}
+//             my name is AshtarteKk
+//             {/* 数组节点类型 */}
+//             {toLearn.map(item=> <div key={item}>let us learn {item}</div>)}
+//             {/* 组件类型 */}
+//             <TextComponent />
+//             {/* 三元运算 */}
+//             {this.status ? <TextComponent /> : <div>三元运算</div>}
+//             {/* 函数执行 */}
+//             {this.renderFoot()}
+//             <button onClick={()=>console.log(this.render())}>打印</button>
+//         </div>
+//     }
+// }
+
 class Index extends React.Component{
     status = false //状态
-    renderFoot = ()=> <div> i am foot</div>
+    renderFoot = ()=> <div>i am foot</div>
+    //控制渲染
+    controlRender=()=>{
+        const reactElement = (
+            <div style={{ marginTop:'100px' }} className="container">
+                {/* element 元素类型 */}
+                <div>hello,world</div>
+                {/* fragment 类型 */}
+                <React.Fragment>
+                    <div> 👽👽 </div>
+                </React.Fragment>
+                {/* text 文本类型 */}
+                my name is AshtarteKk
+                {/* 数组节点类型 */}
+                { toLearn.map(item => <div key={item}>let us learn { item } </div>) }
+                {/* 组件类型 */}
+                <TextComponent />
+                {/* 三元运算 */}
+                { this.status ? <TextComponent /> : <div>三元运算</div> }
+                {/* 函数执行 */}
+                { this.renderFoot() }
+                <button onClick={ () => console.log( this.render() )}> 打印render后的内容</button>
+            </div>
+        )
+        console.log(reactElement)
+        const { children  } = reactElement.props
+        // 第一步:扁平化 children 
+        const flatChildren = React.Children.toArray(children)
+        console.log("flatChildren=>>",flatChildren)
+        // 第二布：出去文本节点
+        const newChildren:any = []
+        React.Children.forEach(flatChildren,item=>{
+            if(React.isValidElement(item)) newChildren.push(item)
+        })
+        //第三步：输入新的节点
+        const lastChildren = React.createElement('div',{className:'last'},`say goodbye`)
+        newChildren.push(lastChildren)
+        //第四步：修改容器节点
+        const newReactElement = React.cloneElement(reactElement,{},...newChildren)
+        return newReactElement
+    }
     render(){
-        // 以下都是常用的jsx元素
-        return <div style={{marginTop:'100px'}}>
-            {/* element元素类型 */}
-            <div>hello,world</div>
-            {/* fragment类型 */}
-            <React.Fragment>
-                <div>👽👽</div>
-            </React.Fragment>
-            {/* text文本类型 */}
-            my name is AshtarteKk
-            {/* 数组节点类型 */}
-            {toLearn.map(item=> <div key={item}>let us learn {item}</div>)}
-            {/* 组件类型 */}
-            <TextComponent />
-            {/* 三元运算 */}
-            {this.status ? <TextComponent /> : <div>三元运算</div>}
-            {/* 函数执行 */}
-            {this.renderFoot()}
-            <button onClick={()=>console.log(this.render())}>打印</button>
-        </div>
+        return this.controlRender()
     }
 }
 
